@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html ng-app="pitchDeckPresent">
+<head>
+	<title> Pitchdeck </title>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- bootstrap library -->
+		<link rel="icon" type="image/png" href="images/favicon.ico" />
+    <link href="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css" type="text/css" rel="stylesheet" />
+    <link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.0/animate.min.css" />
+		<!-- Style sheet -->
+		<link href="style/presentation.css" type="text/css" rel="stylesheet" />
+    <!-- script and jquery -->
+<script src="http://code.jquery.com/jquery-1.11.0.min.js" type="text/javascript"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.0-rc.3/angular.min.js" type="text/javascript"></script>
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/angularjs/1.3.0-rc.3/angular-animate.js"></script>
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/angularjs/1.3.0-rc.3/angular-touch.js"></script>
+<script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/moment.js/2.8.3/moment.min.js"></script>
+<script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js" type="text/javascript"></script>
+<script type="text/javascript" src="js/xml2json.min.js"></script>
+<script src="js/app.js" type="text/javascript"></script>
+    <script>
+		var serverUrl = "http://vm2.world2web.com:8000";
+		var pitchdeckTrackUrl = "https://track.pitchdeck.io/pitchdecktrack";
+		var pubsubUrl = "https://track.pitchdeck.io/pitchdecktrack";
+		var s3BaseUrl = "https://pdeck.s3.amazonaws.com";
+		var staticUrl = "http://vm14.world2web.com:90/docs";
+      jQuery(window).load(function() {
+        // will first fade out the loading animation
+    		jQuery("#status").fadeOut(100);
+        // will fade out the whole DIV that covers the website.
+    		//jQuery("#preloader").delay(200).fadeOut("slow");
+			});
+      </script>
+</head>
+<body ng-controller="presentationCtrl" ng-cloak ng-keydown="keyPress($event)">
+<!--main presetation area-->
+	<div  class="present_view" id="present_view">
+
+			<img ng-swipe-left="next()" ng-swipe-right="prev()" class="img-responsive present-img" ng-class="slideAnim" ng-repeat="slide in slides" ng-hide="!isCurrentPhotoIndex($index)" src="{{s3BaseUrl}}/{{docId}}/html/{{slide._name}}"/>
+
+		<div class="close_button">
+			<!-- <button class="btn btn_square" id="fullbtn"><img src="images/full_screen.png"></button> -->
+			<button class="btn btn_square1" ng-click="closePDP()"><img src="images/ic_present_close.png"></button>
+		</div>
+		<div class="menu_options" id="slide_opt">
+			<aside class="pd_logo">
+				<img class="present_logo" src="images/PD_logo.png">
+			</aside>
+			<section class="slide_ctrl text-center">
+				<div class="bdr">
+					<img style="cursor:pointer" ng-click="prev()" src="images/ic_present_prev.png">
+					<span class="slide_txt">{{currIndex + 1}}/{{slides.length}}</span>
+					<img style="cursor:pointer" ng-click="next()" src="images/ic_present_next.png">
+				</div>
+			</section>
+			<div class="dropup pull-right">
+				  <button class="btn btn_slide dropdown-toggle" type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+				    <img class="slide_ico" src="images/ic_present_slidelist.png">SLIDES
+				  </button>
+				  <ul class="dropdown-menu" aria-labelledby="dropdownMenu2">
+				    <li ng-repeat="slide in slides"><a href ng-click="jump($index, currIndex)">slide {{$index + 1}}</a></li>
+				  </ul>
+				</div>
+		</div>
+
+	</div>
+	<div ng-show="showLastSlide" id="last-slide">
+		<div class="close_button">
+			<button class="btn btn_square" id="fullbtn" ng-click="replay()"><img src="images/ic_replay.png"></button>
+			<button class="btn btn_square1" ng-click="closePDP()"><img src="images/ic_present_close.png"></button>
+		</div>
+		<div class="credits">
+			<img src="images/PD_logo.png" alt="" />
+			<a ng-click="closePDP()" href>
+			</br>
+			<span>Want to create a Deck like this? Visit us @:</span>
+			<h1>www.pitchdeck.io</h1>
+			</a>
+		</div>
+	</div>
+
+
+ <div class="modal fade" id="userInfo" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-sm">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title">Please Enter Your name and Email Address</h4>
+      </div>
+      <div class="modal-body">
+        <div class="form-group" ng-class="{'has-error' : nameError}">
+            <input type="text" ng-model="userName" class="form-control" placeholder="Enter Your Name">
+        </div>
+        <div class="form-group" ng-class="{'has-error' : emailError}">
+            <input type="email" ng-model="userEmail" class="form-control" placeholder="Enter your email address">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-success" ng-click="getUserInfo(userName, userEmail)">Open</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+<div class="modal fade" id="nodeck" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+ <div class="modal-dialog modal-sm">
+	 <div class="modal-content">
+		 <div class="modal-header">
+			 <h4 class="modal-title">Sorry!</h4>
+		 </div>
+		 <div class="modal-body">
+			 <h5>Your Deck is not ready Yet. Please Try Again in some time.</h5>
+		 </div>
+		 <div class="modal-footer">
+			 <button type="button" class="btn btn-success" data-dismiss="modal">Ok</button>
+		 </div>
+	 </div><!-- /.modal-content -->
+ </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+    <div id="preloader">
+  <div id="status"><img src="images/loader.svg" alt="" /></div>
+</div>
+
+</body>
+</html>
